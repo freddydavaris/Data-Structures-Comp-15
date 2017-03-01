@@ -1,0 +1,31 @@
+#
+# Makefile for Sorts, Assignment 5
+#
+CXX = clang++
+FLAGS = -Wall -Wextra -Wconversion -g
+
+all: SelectionSort.cpp SelectionSort.h main1.cpp \
+     InsertionSort.cpp InsertionSort.h main2.cpp \
+     MergeSort.cpp MergeSort.h main3.cpp
+	${CXX} ${FLAGS} -o selectionSort SelectionSort.cpp main1.cpp
+	${CXX} ${FLAGS} -o InsertionSort InsertionSort.cpp main2.cpp
+	${CXX} ${FLAGS} -o MergeSort MergeSort.cpp main3.cpp
+
+selectionSort: SelectionSort.cpp SelectionSort.h main1.cpp
+	${CXX} ${FLAGS} -o selectionSort SelectionSort.cpp main1.cpp
+	
+insertionSort: InsertionSort.cpp InsertionSort.h main2.cpp
+	${CXX} ${FLAGS} -o InsertionSort InsertionSort.cpp main2.cpp
+	
+mergeSort: MergeSort.cpp MergeSort.h main3.cpp
+	${CXX} ${FLAGS} -o MergeSort MergeSort.cpp main3.cpp
+	
+clean:
+	rm -f selectionSort insertionSort mergeSort
+
+make provide:
+	provide comp15 hw5 main1.cpp SelectionSort.cpp SelectionSort.h \
+	        main2.cpp InsertionSort.cpp InsertionSort.h \
+	        main3.cpp MergeSort.cpp MergeSort.h \
+	        ReadMe.md Makefile
+

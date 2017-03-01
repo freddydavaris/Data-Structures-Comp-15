@@ -1,0 +1,120 @@
+// 
+//  MergeSort.cpp
+//  Sorts integers using the MergeSort algorithm
+
+
+#include "MergeSort.h"
+// # split in half
+// m = n / 2
+// 
+// # recursive sorts
+// sort a[1..m]
+// sort a[m+1..n]
+// 
+// # merge sorted sub-arrays using temp array
+// b = copy of a[1..m]
+// i = 1, j = m+1, k = 1
+// while i <= m and j <= n,
+//     a[k++] = (a[j] < b[i]) ? a[j++] : b[i++]
+//     → invariant: a[1..k] in final position
+// while i <= m,
+//     a[k++] = b[i++]
+//     → invariant: a[1..k] in final position
+
+
+
+using namespace std;
+
+MergeSort::MergeSort(){ // constructor
+        sortArray.length = 0;
+        sortArray.arr = NULL;
+}
+
+// reads in a list of integers from stdin and returns an arrayWithLength
+void MergeSort::readList(){
+        int currentCapacity = 10;
+        sortArray.arr = new int[currentCapacity];
+        
+        while (cin >> sortArray.arr[sortArray.length]) {
+                ++sortArray.length;
+                if (sortArray.length==currentCapacity) {
+                        int *temp = new int[currentCapacity*2];
+                        for (int i=0;i<currentCapacity;i++) {
+                                temp[i] = sortArray.arr[i];
+                        }
+                        delete [] sortArray.arr;
+                        sortArray.arr = temp;
+                        currentCapacity *= 2;
+          
+		}
+        }
+}
+
+void MergeSort::Split_Array(int low, int high, int *tempArray){
+	 
+	
+	 int halfarraylength = (high+low)/2;
+	 
+	 if (low < high) {
+		Split_Array(low, halfarraylength, tempArray);
+		Split_Array(halfarraylength + 1, high, tempArray);
+		Sort (low, high, tempArray);
+	 }
+	 return;
+}
+void MergeSort::Sort(int low, int high, int *tempArray)
+{
+	int halfarraylength = (high+low)/2; 
+	int temp_counter = low; 
+	int low_counter = low; 
+	int high_counter = halfarraylength + 1; 
+	
+	while ( (low_counter <= halfarraylength) && (high_counter <= high)) {
+	
+		if (sortArray.arr[low_counter] < sortArray.arr[high_counter]) {
+			tempArray[temp_counter] = sortArray.arr[low_counter]; 
+			low_counter++; 
+		}
+		else  {
+			tempArray[temp_counter] = sortArray.arr[high_counter]; 
+			high_counter++; 
+		}
+		temp_counter++; 
+	}
+		
+		if (low_counter > halfarraylength){
+			while (high_counter <= high){
+				tempArray[temp_counter++] = sortArray.arr[high_counter]; 
+				high_counter++;
+			}
+		}
+		else {
+			while (low_counter <= halfarraylength){
+				tempArray[temp_counter++] = sortArray.arr[low_counter]; 
+				low_counter++;
+			}
+		}
+		
+	
+	for (int i = low; i <= high; i++) {
+		sortArray.arr[i] = tempArray[i]; 
+	}
+	
+}
+
+
+	
+void MergeSort::sort(){
+	int *tempArray = new int[sortArray.length]; 
+	Split_Array(0, sortArray.length -1, tempArray);
+	delete [] tempArray; 
+
+}
+
+void MergeSort::printArray(){
+        // prints out the integers in sorted order
+	for (int i = 0; i < sortArray.length; i++) {
+		cout << sortArray.arr[i] << endl; 
+	}
+
+}

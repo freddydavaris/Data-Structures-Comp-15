@@ -1,0 +1,204 @@
+/*
+ * IsisCourse.cpp
+ *
+ */
+
+#include <iostream>
+#include "IsisCourse.h"
+
+IsisCourse::IsisCourse() {
+	class_capacity = 0; // no students allowed in yet
+}
+
+IsisCourse::IsisCourse(int init_capacity) {
+	class_capacity = init_capacity;
+}
+
+IsisCourse::~IsisCourse() {
+	// nothing to do
+}
+
+void IsisCourse::set_class_cap(int cap) {
+	class_capacity = cap;
+	if (roster.size() < class_capacity) {
+		update_enrollments();
+	}
+}
+
+IsisCourse::ENROLLMENT_STATUS IsisCourse::enroll_student(Student s) {
+	// Attempts to enroll a student into the class.
+	// Majors go directly into the class, and non-majors
+	// go directly onto the waitlist, even if there is space
+	// in the class.
+	// Simplification: you do not need to check if a student is
+	// on a waitlist already before placing that student onto
+	// the appropriate waitlist.
+	// returns the status of a student (NONE, ENROLLED,
+	// MAJOR_WAITLIST, or OTHER_WAITLIST)
+	// TODO: Student writes code here  
+	
+	if (s.major == true){
+		if ( roster.size() < class_capacity){ 
+			roster.add(s); 
+			return ENROLLED;
+		}
+		else {	
+			major_waitlist.enqueue(s); 
+			return MAJOR_WAITLIST;
+		}
+	}
+	else {  	
+			other_waitlist.enqueue(s); 
+			return OTHER_WAITLIST; 
+	}
+			// Question : When do i return NONE? 
+	return NONE; 
+	
+}
+
+bool IsisCourse::drop_student(Student s) {
+	
+	bool found_student = false; // if we find the student to drop
+	// TODO: Student writes code here
+	roster.drop(s); // QUESTION : WTF IS IT SO EASY?
+
+	// if we dropped a student, there should be room on
+	// the roster
+	update_enrollments();
+	return found_student;
+}
+
+int IsisCourse::waitlist_position(ENROLLMENT_STATUS status, Student s) {
+	// TODO: Student writes code here
+	Queue *waitlist_queue;
+	int i = 0; 
+	int counter = 0; 
+	int position_major = major_waitlist.getfront() + i; 
+	int position_other = other_waitlist.getfront() + i; 
+	
+	if (status == ENROLLED || status == NONE) {
+		return -1; // QUESTION : SHOULD I RETURN ANYTHING ELSE?
+	}
+	else if (status == MAJOR_WAITLIST) {
+		waitlist_queue = &major_waitlist;
+		while (s.name != waitlist_queue->getName(position_major)){
+			if (position_major > major_waitlist.getcapacity()){
+				position_major = position_major - major_waitlist.getcapacity(); 
+			}
+			i++;
+			counter++;
+				
+	}
+	}
+	else if (status == OTHER_WAITLIST) {
+		waitlist_queue = &other_waitlist;
+		while (s.name != waitlist_queue->getName(position_other)){
+			if (position_other > other_waitlist.getcapacity()){
+				position_other = position_other - other_waitlist.getcapacity(); 
+			}
+			i++;
+			counter++;
+				
+		}	
+	}
+	return counter; 
+
+}
+
+IsisCourse::ENROLLMENT_STATUS IsisCourse::status(Student s) {
+	// returns an ENROLLMENT_STATUS that says which list
+	// (or none) that the student is on.
+	// TODO: 
+	int i = 0; 
+	int k = 0
+	; 
+	int position_major = major_waitlist.getfront() + i;
+	int position_other = other_waitlist.getfront() + k;
+	Queue *waitlist_queue;
+	if (s.major){
+		waitlist_queue = &major_waitlist;
+		 for (i = 0; i < major_waitlist.getcapacity(); i++)
+			if (position_major > major_waitlist.getcapacity()){
+				position_major = position_major - major_waitlist.getcapacity(); 
+			} 
+		 if (s.name == waitlist_queue->getName(position_major))
+			 return MAJOR_WAITLIST; 
+	}
+	else {
+		return ENROLLED; 
+	}
+	if (s.major == false){
+		waitlist_queue = &other_waitlist;
+		 for (k = 0 ; k < other_waitlist.getcapacity(); k++)
+			if (position_other > other_waitlist.getcapacity()){
+				position_other = position_other - other_waitlist.getcapacity(); 
+			} 
+		 if (s.name == waitlist_queue->getName(position_other))
+			 return OTHER_WAITLIST; 
+	}
+	else {
+		return ENROLLED; 
+	}
+	
+	return NONE;
+}
+
+void IsisCourse::print_list(ENROLLMENT_STATUS status) {
+	Queue *waitlist_queue;
+	int position_major = major_waitlist.getfront();
+	int position_other = other_waitlist.getfront();
+	
+	if (status == ENROLLED) {
+		roster.print_class();
+		return;
+	}
+	if (status == MAJOR_WAITLIST) {
+		waitlist_queue = &major_waitlist;
+		for (int i = 0; i < waitlist_queue->getSize(); i++){
+			cout << i + 1 << " " << waitlist_queue->getName(position_major) << endl; 
+			position_major = (position_major + 1) % waitlist_queue->getcapacity();
+		}
+		return;
+	}
+	else {
+		waitlist_queue = &other_waitlist;
+		for (int i = 0; i < waitlist_queue->getSize(); i++){
+			cout << i + 1 << " " << waitlist_queue->getName(position_other) << endl; 
+			position_other = (position_other + 1) % waitlist_queue->getcapacity();
+		}
+		return;
+	}
+	// now handle printing the queue
+	// prints the roster (ENROLLED) or waitlist
+	// (either MAJOR_WAITLIST or OTHER_WAITLIST)
+	// in the following form (names should be in priority from
+	// the waitlist):
+	// 1. student.name
+	// 2. student.name
+	// 3. student.name
+	// etc.
+	// TODO: Student writes code here
+
+}
+
+void IsisCourse::update_enrollments() {
+	// put students from the waitlists into the class
+	// in priority (majors first, then others), up to
+	// the class capacity.
+	Queue *waitlist_queue_major = &major_waitlist;
+	Queue *waitlist_queue_other = &other_waitlist; 
+	
+	while (roster.size() < class_capacity) {
+		if (waitlist_queue_major->is_empty() == false){
+			Student student_inserted = waitlist_queue_major->dequeue();
+			roster.add(student_inserted);
+		}
+		else if (waitlist_queue_other->is_empty() == false){
+			Student student_inserted = waitlist_queue_other->dequeue(); 
+			roster.add(student_inserted);
+		}
+		else {
+			return; 
+		}
+	}
+}
